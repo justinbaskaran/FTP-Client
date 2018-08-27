@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from tkinter import *
-fields = 'Last Name', 'First Name', 'Job', 'Country'
+fields = 'IP address', 'Password', 'SSH-Key'
 
 def fetch(entries):
    for entry in entries:
@@ -23,6 +23,7 @@ def makeform(root, fields):
 
 if __name__ == '__main__':
    root = Tk()
+   root.title("SSH-Client");
    ents = makeform(root, fields)
    root.bind('<Return>', (lambda event, e=ents: fetch(e)))
    b1 = Button(root, text='Show',
