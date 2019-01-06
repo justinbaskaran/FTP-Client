@@ -1,4 +1,4 @@
-# SSH-Client-Python
+# SSH-Client-Java (Username-Password Based Authentication Only) (For Now)
 
 To try the app:
 (Currently only support UNIX systems)
