@@ -1,7 +1,8 @@
 # SSH-Client-Python
 
-This Repo has two parts, a exe part and a mac dmg part. 
-
-Exe part- compiled for windows based systems 
-
-Mac Part- compiled for Mac based Ssytems 
+To try the app:
+(Currently only support UNIX systems)
+1) Download this repo
+2) enter it via command line
+3)  type "make clean"
+4) type "make all"
