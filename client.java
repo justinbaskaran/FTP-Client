@@ -3,15 +3,20 @@ import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-
-
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Arrays;
 import java.io.IOException;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 
+
+
 import javax.swing.*;  
-import javax.swing.tree.DefaultMutableTreeNode;  
+import javax.swing.tree.DefaultMutableTreeNode;
 
 
 
@@ -121,8 +126,8 @@ public static void logonComponents(JPanel panel,JFrame frame) {
                     frame.setSize(501,500);
                     frame.setBackground(Color.WHITE);
                     showFTP(frame,client);
-                    client.logout();
-                    client.disconnect();
+                  
+              
                 }
                 else 
                 {
@@ -147,42 +152,152 @@ public static void logonComponents(JPanel panel,JFrame frame) {
 
     public static void showFTP( JFrame frame,FTPClient client)
     {
-        try {
-        FTPFile[] files = client.listFiles("~");
-        DefaultMutableTreeNode style=new DefaultMutableTreeNode("~");
-        for (FTPFile file : files) {
-            DefaultMutableTreeNode file_file=new DefaultMutableTreeNode(file.getName());  
-            style.add(file_file);
-            
-        }
+        int counter=0;
         JPanel panel = new JPanel();
         frame.add(panel);
-
+        DefaultMutableTreeNode style = getFileStructure(client, "~");
         JTree jt =new JTree(style);
         panel.add(jt);  
         panel.updateUI();
         panel.setVisible(true);
 
-        MouseListener ml = new MouseAdapter() {
-            public void mousePressed(MouseEvent e) {
-                int selRow = jt.getRowForLocation(e.getX(), e.getY());
-                TreePath selPath = jt.getPathForLocation(e.getX(), e.getY());
-                if(selRow != -1) {
-                    if(e.getClickCount() == 1) {
-                        mySingleClick(selRow, selPath);
+        JButton login = new JButton("GET");
+        login.setBounds(10, 120, 120, 25);
+        panel.add(login);
+        panel.updateUI();
+        panel.setVisible(true);
+
+        login.addActionListener(new ActionListener(){  
+            public void actionPerformed(ActionEvent e) {
+                String jTreeVarSelectedPath = "";
+                Object[] paths = jt.getSelectionPath().getPath();
+                for (int i=0; i<paths.length; i++) {
+                    jTreeVarSelectedPath += paths[i];
+                    if (i+1 <paths.length ) {
+                        jTreeVarSelectedPath += "/";
                     }
-                    else if(e.getClickCount() == 2) {
-                        myDoubleClick(selRow, selPath);
-                    }
+
                 }
+                //System.out.print("\n"+"Clicked!" + jTreeVarSelectedPath);
+                try {
+                if (client == null)
+                {
+                    System.out.print("\n"+"NULL!");
+  
+                }
+            
+            String[] tokens = jTreeVarSelectedPath.split("/");
+
+            String absoultePath="";
+
+            for (int i=0; i<tokens.length-1; i++)
+            {
+                absoultePath += tokens[i];
             }
-        };
-        jt.addMouseListener(ml);
+
+            System.out.println("\n AB: " + absoultePath);
+
+            client.changeWorkingDirectory(absoultePath);
+
+           String fileName = tokens[tokens.length-1];
+           //String fileName = Arrays.toString(tokens);
+
+            System.out.println("\n FileName: " + fileName);
+
+            OutputStream os = new FileOutputStream(fileName);
+
+            boolean status = client.retrieveFile(fileName, os);
+
+            if (status)
+            {
+                System.out.print("Downloading Succesfful!");
+            }
+            else 
+            {
+                System.out.print("Downloading Failure!");
+            }
+             
+            } catch (IOException ex) {
+                System.out.println("IOException:" + ex);
+             } 
 
 
+            }
+        });
+
+    }
+    public static int downloadFolder(FTPClient client,String workingPath )
+    {
+        // File file;
+
+        // if (file.isDirectory())
+        // {
+        //     // Change working Directory to this directory.
+        //     client.changeWorkingDirectory(file.getName());
+
+        //     // Create the directory locally - in the right place
+        //     File newDir = new File (base + "/" + ftpClient.printWorkingDirectory());
+        //     newDir.mkdirs();
+
+        //     // Recursive call to this method.
+        //     download(client.printWorkingDirectory(), base);
+
+        //     // Come back out to the parent level.
+        //     client.changeToParentDirectory();
+        // }
+        return 0;
+    }
+    public static int downloadFile(FTPClient client,String workingPath )
+    {
+        return 0;
+    }
+
+
+    public static DefaultMutableTreeNode getFileStructure(FTPClient client,String workingPath )
+    {
+    
+    DefaultMutableTreeNode style = null;
+    try {
+      
+        FTPFile[] files = client.listFiles(workingPath);
+        style=new DefaultMutableTreeNode(workingPath);
+        for (FTPFile file : files) {
+            if (file.isDirectory())
+            {
+                DefaultMutableTreeNode fileDirectory =new DefaultMutableTreeNode(file.getName());
+                System.out.print("\n" +   workingPath + "/" + file.getName());
+                style.add(fileDirectory);
+                getFileStructure(client, workingPath + "/" + file.getName());
+            } else {
+                
+
+            //     String[] tokens = client.printWorkingDirectory().split("/");
+    
+            //   //  style=new DefaultMutableTreeNode(tokens[tokens.length -1]);
+            //   style=new DefaultMutableTreeNode("Desktop");
+
+            //     System.out.print("\n" + "\t"+ file.getName());
+
+                DefaultMutableTreeNode file_file=new DefaultMutableTreeNode(file.getName());  
+                style.add(file_file);
+                //style=new DefaultMutableTreeNode(workingPath);
+           
+            }
+
+
+        }
+  
+     
     } catch (IOException ex) {
         System.out.println("IOException:" + ex);
      } 
 
+     
+     DefaultMutableTreeNode Mutastyle=new DefaultMutableTreeNode("Documnets");  
+
+     DefaultMutableTreeNode file_file=new DefaultMutableTreeNode("file.getName()");  
+
+     Mutastyle.add(file_file);
+     return style;
     }
 }
