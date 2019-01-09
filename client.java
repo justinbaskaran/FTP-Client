@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.io.IOException;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
@@ -17,10 +18,18 @@ import org.apache.commons.net.ftp.FTPFile;
 
 import javax.swing.*;  
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 
 
 
 public class client {
+
+    static DefaultMutableTreeNode styles = new DefaultMutableTreeNode();
+    static JTree jt= new JTree(styles);
+
   public static void main(String[] args) {
         JFrame frame = new JFrame("FTP Client");
         frame.setSize(300,200);
@@ -152,20 +161,37 @@ public static void logonComponents(JPanel panel,JFrame frame) {
 
     public static void showFTP( JFrame frame,FTPClient client)
     {
-        int counter=0;
         JPanel panel = new JPanel();
         frame.add(panel);
-        DefaultMutableTreeNode style = getFileStructure(client, "~");
-        JTree jt =new JTree(style);
-        panel.add(jt);  
-        panel.updateUI();
-        panel.setVisible(true);
 
+        
         JButton login = new JButton("GET");
-        login.setBounds(10, 120, 120, 25);
+        login.setBounds(10, 10, 10, 10);
         panel.add(login);
         panel.updateUI();
         panel.setVisible(true);
+
+        
+        DefaultMutableTreeNode exampleNode= new DefaultMutableTreeNode("~");
+        styles = getFileStructure(client, "~",exampleNode);
+        jt =new JTree(styles);
+        jt.setEditable(true);
+        jt.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        jt.setShowsRootHandles(true);
+        panel.add(jt);  
+        panel.add(new JScrollPane(jt));
+        panel.updateUI();
+        panel.setVisible(true);
+
+
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        panel.add(scrollPane);
+        panel.updateUI();
+        panel.setVisible(true);
+        
+ 
 
         login.addActionListener(new ActionListener(){  
             public void actionPerformed(ActionEvent e) {
@@ -178,7 +204,7 @@ public static void logonComponents(JPanel panel,JFrame frame) {
                     }
 
                 }
-                //System.out.print("\n"+"Clicked!" + jTreeVarSelectedPath);
+            System.out.print("\n"+"Clicked!" + jTreeVarSelectedPath);
                 try {
                 if (client == null)
                 {
@@ -226,78 +252,76 @@ public static void logonComponents(JPanel panel,JFrame frame) {
         });
 
     }
-    public static int downloadFolder(FTPClient client,String workingPath )
-    {
-        // File file;
-
-        // if (file.isDirectory())
-        // {
-        //     // Change working Directory to this directory.
-        //     client.changeWorkingDirectory(file.getName());
-
-        //     // Create the directory locally - in the right place
-        //     File newDir = new File (base + "/" + ftpClient.printWorkingDirectory());
-        //     newDir.mkdirs();
-
-        //     // Recursive call to this method.
-        //     download(client.printWorkingDirectory(), base);
-
-        //     // Come back out to the parent level.
-        //     client.changeToParentDirectory();
-        // }
-        return 0;
-    }
-    public static int downloadFile(FTPClient client,String workingPath )
-    {
-        return 0;
-    }
 
 
-    public static DefaultMutableTreeNode getFileStructure(FTPClient client,String workingPath )
+    public static DefaultMutableTreeNode getFileStructure(FTPClient client,String workingPath,DefaultMutableTreeNode style )
     {
     
-    DefaultMutableTreeNode style = null;
     try {
-      
+        System.out.println("\n");
+        System.out.println("Working Path: " + workingPath);
         FTPFile[] files = client.listFiles(workingPath);
-        style=new DefaultMutableTreeNode(workingPath);
+        DefaultMutableTreeNode node = buildNodeFromString(workingPath);
+        DefaultMutableTreeNode lastLeaf = node.getLastLeaf();
+        TreePath path = new TreePath(lastLeaf.getPath());
+        System.out.println("Path =" + path);
+        
+        
+        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)(path.getLastPathComponent());       
+
+
         for (FTPFile file : files) {
             if (file.isDirectory())
             {
-                DefaultMutableTreeNode fileDirectory =new DefaultMutableTreeNode(file.getName());
-                System.out.print("\n" +   workingPath + "/" + file.getName());
-                style.add(fileDirectory);
-                getFileStructure(client, workingPath + "/" + file.getName());
+                getFileStructure(client, workingPath + "/" + file.getName(),style);
             } else {
-                
-
-            //     String[] tokens = client.printWorkingDirectory().split("/");
-    
-            //   //  style=new DefaultMutableTreeNode(tokens[tokens.length -1]);
-            //   style=new DefaultMutableTreeNode("Desktop");
-
-            //     System.out.print("\n" + "\t"+ file.getName());
-
-                DefaultMutableTreeNode file_file=new DefaultMutableTreeNode(file.getName());  
-                style.add(file_file);
-                //style=new DefaultMutableTreeNode(workingPath);
+            DefaultMutableTreeNode root =new DefaultMutableTreeNode();  
+            System.out.println("Filename: " + file.getName());
            
+            DefaultMutableTreeNode fileDirectory =new DefaultMutableTreeNode(file.getName());
+
+            
+            selectedNode.add(fileDirectory);
+
+            System.out.println("Added to node = " + selectedNode.toString());
+            System.out.println("First Node = " + selectedNode.getFirstChild().toString());
+            System.out.println("Last Node = " + selectedNode.getLastChild().toString());
+            System.out.println("Num of Children = " + selectedNode.getLeafCount());
+            System.out.println("Depth Count= " + selectedNode.getDepth());
             }
-
-
         }
-  
-     
+
+
+        style.add(selectedNode);
     } catch (IOException ex) {
         System.out.println("IOException:" + ex);
      } 
 
      
-     DefaultMutableTreeNode Mutastyle=new DefaultMutableTreeNode("Documnets");  
-
-     DefaultMutableTreeNode file_file=new DefaultMutableTreeNode("file.getName()");  
-
-     Mutastyle.add(file_file);
+   
      return style;
     }
+
+    private static DefaultMutableTreeNode buildNodeFromString(String path)
+    {
+        String[] s = path.split("/");
+        DefaultMutableTreeNode node, lastNode = null, root = null;
+        for(String str : s)
+        {
+
+            node = new DefaultMutableTreeNode(str);
+            if(root == null)
+                root = node;
+            if(lastNode != null)
+                lastNode.add(node);
+            lastNode = node;
+        }
+        return root;        
+    }
+
+
+
+
+
+
 }
