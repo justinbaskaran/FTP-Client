@@ -178,6 +178,7 @@ public static void logonComponents(JPanel panel,JFrame frame) {
         jt.setEditable(true);
         jt.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         jt.setShowsRootHandles(true);
+    
         panel.add(jt);  
         panel.add(new JScrollPane(jt));
         panel.updateUI();
@@ -265,14 +266,15 @@ public static void logonComponents(JPanel panel,JFrame frame) {
         DefaultMutableTreeNode lastLeaf = node.getLastLeaf();
         TreePath path = new TreePath(lastLeaf.getPath());
         System.out.println("Path =" + path);
-        
-        
         DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)(path.getLastPathComponent());       
-
-
+        System.out.println("Add to Node:" + selectedNode.toString());
         for (FTPFile file : files) {
             if (file.isDirectory())
             {
+                // DefaultMutableTreeNode fileDirectory =new DefaultMutableTreeNode(file.getName());
+                // selectedNode.add(fileDirectory);
+
+                System.out.println("\t Folder Name: " + file.getName());
                 getFileStructure(client, workingPath + "/" + file.getName(),style);
             } else {
             DefaultMutableTreeNode root =new DefaultMutableTreeNode();  
@@ -290,9 +292,7 @@ public static void logonComponents(JPanel panel,JFrame frame) {
             System.out.println("Depth Count= " + selectedNode.getDepth());
             }
         }
-
-
-        style.add(selectedNode);
+        insertNodes(style,selectedNode,workingPath);        
     } catch (IOException ex) {
         System.out.println("IOException:" + ex);
      } 
@@ -301,6 +301,53 @@ public static void logonComponents(JPanel panel,JFrame frame) {
    
      return style;
     }
+
+
+    private static void insertNodes
+            (DefaultMutableTreeNode root
+                ,DefaultMutableTreeNode newNode
+                    ,String tp)
+    {
+        String[] elements = tp.split("/");
+        String treePath = "";
+        for (int i=0; i<elements.length-1; i++)
+        {
+            if (i == elements.length-2)
+            {
+                treePath += elements[i];
+            } else {
+            treePath += elements[i] + "/" ;
+            }
+        }
+        System.out.println("TreePath : " + treePath);
+
+        DefaultMutableTreeNode node = buildNodeFromString(treePath);
+        DefaultMutableTreeNode lastLeaf = node.getLastLeaf();
+        TreePath path = new TreePath(lastLeaf.getPath());
+        System.out.println("insertNodes-Path =" + path);
+        DefaultTreeModel model = new DefaultTreeModel(root);
+
+
+
+        DefaultMutableTreeNode pictureNode = (DefaultMutableTreeNode) path.getLastPathComponent();
+        pictureNode.add(newNode);
+        
+        
+        
+
+
+        // Notify the model of the changes
+        model.nodesWereInserted(pictureNode, new int[]{pictureNode.getChildCount() - 1});
+
+        // The above way (you suggested) wipes out everything and just puts one "~" in the JTree
+
+
+        // The below line adds them all to the "~" direcotry
+        //root.add(newNode); 
+    
+
+    }
+
 
     private static DefaultMutableTreeNode buildNodeFromString(String path)
     {
