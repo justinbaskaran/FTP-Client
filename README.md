@@ -1,4 +1,4 @@
-# SSH-Client-Java (Username-Password Based Authentication Only) (For Now)
+# FTP-Client-Java (Username-Password Based Authentication Only) (For Now)
 
 To try the app:
 (Currently only supports UNIX systems)
