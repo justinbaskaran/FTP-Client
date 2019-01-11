@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.List;
 import java.io.IOException;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
@@ -20,8 +21,10 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+
 
 
 
@@ -180,6 +183,7 @@ public static void logonComponents(JPanel panel,JFrame frame) {
         jt.setShowsRootHandles(true);
     
         panel.add(jt);  
+        panel.setBounds(100,100,100,100);
         panel.add(new JScrollPane(jt));
         panel.updateUI();
         panel.setVisible(true);
@@ -219,7 +223,7 @@ public static void logonComponents(JPanel panel,JFrame frame) {
 
             for (int i=0; i<tokens.length-1; i++)
             {
-                absoultePath += tokens[i];
+                absoultePath += tokens[i] + "/";
             }
 
             System.out.println("\n AB: " + absoultePath);
@@ -237,7 +241,7 @@ public static void logonComponents(JPanel panel,JFrame frame) {
 
             if (status)
             {
-                System.out.print("Downloading Succesfful!");
+                System.out.print("Downloading Succesful!");
             }
             else 
             {
@@ -260,39 +264,49 @@ public static void logonComponents(JPanel panel,JFrame frame) {
     
     try {
         System.out.println("\n");
-        System.out.println("Working Path: " + workingPath);
+    //    System.out.println("Working Path: " + workingPath);
         FTPFile[] files = client.listFiles(workingPath);
         DefaultMutableTreeNode node = buildNodeFromString(workingPath);
         DefaultMutableTreeNode lastLeaf = node.getLastLeaf();
         TreePath path = new TreePath(lastLeaf.getPath());
-        System.out.println("Path =" + path);
+       // System.out.println("Path =" + path);
         DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)(path.getLastPathComponent());       
-        System.out.println("Add to Node:" + selectedNode.toString());
+      //  System.out.println("Add to Node:" + selectedNode.toString());
         for (FTPFile file : files) {
             if (file.isDirectory())
             {
-                // DefaultMutableTreeNode fileDirectory =new DefaultMutableTreeNode(file.getName());
-                // selectedNode.add(fileDirectory);
+            //   DefaultMutableTreeNode fileDirectory =new DefaultMutableTreeNode(file.getName());
+            //   style.add(fileDirectory);
 
                 System.out.println("\t Folder Name: " + file.getName());
                 getFileStructure(client, workingPath + "/" + file.getName(),style);
             } else {
             DefaultMutableTreeNode root =new DefaultMutableTreeNode();  
-            System.out.println("Filename: " + file.getName());
+          //  System.out.println("Filename: " + file.getName());
            
             DefaultMutableTreeNode fileDirectory =new DefaultMutableTreeNode(file.getName());
 
             
             selectedNode.add(fileDirectory);
 
-            System.out.println("Added to node = " + selectedNode.toString());
-            System.out.println("First Node = " + selectedNode.getFirstChild().toString());
-            System.out.println("Last Node = " + selectedNode.getLastChild().toString());
-            System.out.println("Num of Children = " + selectedNode.getLeafCount());
-            System.out.println("Depth Count= " + selectedNode.getDepth());
+          // System.out.println("Added to node = " + selectedNode.toString());
+          //  System.out.println("First Node = " + selectedNode.getFirstChild().toString());
+          //  System.out.println("Last Node = " + selectedNode.getLastChild().toString());
+          //  System.out.println("Num of Children = " + selectedNode.getLeafCount());
+           // System.out.println("Depth Count= " + selectedNode.getDepth());
             }
         }
-        insertNodes(style,selectedNode,workingPath);        
+        DefaultTreeModel model = new DefaultTreeModel(style);
+        if (model == null) {System.out.println("MODEL IS NULL");}
+        if (findNode(model, workingPath) == null) {System.out.println("findNode(model, workingPath) IS NULL");}
+        if (selectedNode == null) {System.out.println("selectedNode IS NULL");}
+      //  style.add(selectedNode);
+
+     
+       insertNodes(model, findNode(model, workingPath), selectedNode); 
+        
+       
+     //  style.add(selectedNode);
     } catch (IOException ex) {
         System.out.println("IOException:" + ex);
      } 
@@ -303,50 +317,90 @@ public static void logonComponents(JPanel panel,JFrame frame) {
     }
 
 
-    private static void insertNodes
-            (DefaultMutableTreeNode root
-                ,DefaultMutableTreeNode newNode
-                    ,String tp)
-    {
-        String[] elements = tp.split("/");
-        String treePath = "";
-        for (int i=0; i<elements.length-1; i++)
-        {
-            if (i == elements.length-2)
-            {
-                treePath += elements[i];
-            } else {
-            treePath += elements[i] + "/" ;
-            }
-        }
-        System.out.println("TreePath : " + treePath);
+    private static void insertNodes(
+        DefaultTreeModel model,
+        DefaultMutableTreeNode parent,
+        DefaultMutableTreeNode newNode) {
 
-        DefaultMutableTreeNode node = buildNodeFromString(treePath);
-        DefaultMutableTreeNode lastLeaf = node.getLastLeaf();
-        TreePath path = new TreePath(lastLeaf.getPath());
-        System.out.println("insertNodes-Path =" + path);
-        DefaultTreeModel model = new DefaultTreeModel(root);
+    if (parent == null) {System.out.println("insertNodes-Parent IS NULL");}
+    if (newNode == null) {System.out.println("insertNodes-newNode IS NULL");}
+    parent.add(newNode);
+    model.nodesWereInserted(parent, new int[]{parent.getChildCount() - 1});
+}
 
-
-
-        DefaultMutableTreeNode pictureNode = (DefaultMutableTreeNode) path.getLastPathComponent();
-        pictureNode.add(newNode);
-        
-        
-        
-
-
-        // Notify the model of the changes
-        model.nodesWereInserted(pictureNode, new int[]{pictureNode.getChildCount() - 1});
-
-        // The above way (you suggested) wipes out everything and just puts one "~" in the JTree
-
-
-        // The below line adds them all to the "~" direcotry
-        //root.add(newNode); 
+protected static DefaultMutableTreeNode findNode(DefaultTreeModel model, String path) {
+    DefaultMutableTreeNode node = (DefaultMutableTreeNode) model.getRoot();
+    String[] parts = path.split("/");
     
+    if (node.getUserObject().toString().equals(parts[0])) {
+         return findNode(node, Arrays.copyOfRange(parts, 1, parts.length));
+    }
+    return null;
+}
+
+protected static DefaultMutableTreeNode findNode(DefaultMutableTreeNode node, String[] path) {
+    System.out.println("");
+    System.out.println("findNode-pathToNode:" + Arrays.toString(path));
+    System.out.println("findNode-NodeName:" + node.toString());
+    if (path.length == 1) {
+        return node;
+    }
+
+    Enumeration<TreeNode> children =  node.children();
+
+    System.out.println("findNode-childCount:" + node.getChildCount());
+
+    
+    if (path.length > 0) {
+    
+    DefaultMutableTreeNode tv = new DefaultMutableTreeNode(path[0]);
+
+    System.out.println("findNode-MoreNodes?:" + children.hasMoreElements());
+
+    if (!children.hasMoreElements())
+    {
+        node.add(tv);
+    }
+  
+    while (children.hasMoreElements()) {
+  
+        DefaultMutableTreeNode child = (DefaultMutableTreeNode)children.nextElement();
+
+        if (!children.hasMoreElements()&& !child.getUserObject().toString().equals(path[0]))
+        {
+            System.out.println("HERE:" + child.toString());
+            node.add(tv);
+        }
+
+
+
+        System.out.println("findNode-existentNode:" + child.getUserObject().toString());
+       System.out.println("findNode-filePath:" + path[0]);
+
+
+        if (child == null) {System.out.println("findNode-child IS NULL");}
+        if ( Arrays.copyOfRange(path, 1, path.length) == null) {System.out.println("findNode-newNode IS NULL");}
+
+
+        if (child.getUserObject().toString().equals(path[0])) {
+           // System.out.println("YOU GOT HERE!");
+            return findNode(child, Arrays.copyOfRange(path, 1, path.length));
+            
+        }
+      
 
     }
+  
+    
+}
+else {
+    return node;
+}
+    return null;
+}
+
+
+
 
 
     private static DefaultMutableTreeNode buildNodeFromString(String path)
