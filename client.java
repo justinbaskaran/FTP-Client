@@ -40,6 +40,7 @@ public class client {
     static JTextField IPtext;
     static JTextField usertext;
     static JPasswordField passtext;
+    static JLabel Message;
 
   public static void main(String[] args) {
         // String home = System.getProperty("user.home");
@@ -182,6 +183,9 @@ public static void logonComponents(JPanel panel,JFrame frame) {
         JPanel panel = new JPanel();
         frame.add(panel);
 
+        Message = new JLabel("");
+        Message.setBounds(10, 115, 10, 10);
+        panel.add(Message);
         
         JButton login = new JButton("Download");
         login.setBounds(10, 10, 10, 10);
@@ -245,7 +249,14 @@ public static void logonComponents(JPanel panel,JFrame frame) {
 
                    boolean status = sendFileClient.storeFile(filetoSend.getName(), targetStream);
                    sendFileClient.logout();
-                   System.out.print("\n"+"Success!");
+                   if (status)
+                   {
+                        Message.setText("Successfully uploaded!");
+                   } else {
+                        Message.setText("Failure to upload!");
+                   }
+
+
                 } catch (IOException a) {
                     System.out.println("IOException" + a);
                 }
@@ -371,11 +382,11 @@ public static void logonComponents(JPanel panel,JFrame frame) {
 
             if (status)
             {
-                System.out.print("Downloading Succesful!");
+                Message.setText("Sucessfully downloaded!");
             }
             else 
             {
-                System.out.print("Downloading Failure!");
+                Message.setText("Failure to download!");
             }
              
             } catch (IOException ex) {
