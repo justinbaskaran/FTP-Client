@@ -111,17 +111,22 @@ public static void logonComponents(JPanel panel,JFrame frame) {
          try {
             FTPClient client = new FTPClient();
     
-               client.connect(IPtext.getText(),21);
+            //    client.connect(IPtext.getText(),21);
              
+               client.connect("153.106.73.93",21);
 
                int reasonConnect = client.getReplyCode();
                System.out.print("\n"+"Connect Status Code: "+reasonConnect + "\n");
 
                client.enterLocalPassiveMode();
 
-                String username = usertext.getText().toString();
+                // String username = usertext.getText().toString();
 
-                String password = passtext.getText().toString();
+                // String password = passtext.getText().toString();
+
+                String username = "pi";
+
+                String password = "justinbaskaran";
 
 
                 System.out.print("IP:"+ IPtext.getText().toString() + "\n"+"Username:" + username + "\n"
@@ -508,10 +513,7 @@ public static void logonComponents(JPanel panel,JFrame frame) {
     
         
         return null;
-    }
-    
-    
-    
+    }  
     protected static DefaultMutableTreeNode findLocalNodeParent(DefaultMutableTreeNode node, String[] path) {
         if (path.length == 1) {
             System.out.println("findNode-ParentNode:" + node.getUserObject().toString()
@@ -544,69 +546,69 @@ public static void logonComponents(JPanel panel,JFrame frame) {
             }
         }
        
-    }
-    else {
-        return node;
-    }
+        }
+        else {
+            return node;
+        }
         return null;
     }
 
     public static DefaultMutableTreeNode getFileStructure(FTPClient client,String workingPath,DefaultMutableTreeNode style )
     {
-    try {
-       System.out.println("\n");
-       System.out.println("Working Path: " + workingPath);
-        FTPFile[] files = client.listFiles(workingPath);
-        DefaultMutableTreeNode node = buildNodeFromString(workingPath);
-        DefaultMutableTreeNode lastLeaf = node.getLastLeaf();
-        TreePath path = new TreePath(lastLeaf.getPath());
-       // System.out.println("Path =" + path);
-        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)(path.getLastPathComponent());       
-      //  System.out.println("Add to Node:" + selectedNode.toString());
-        for (FTPFile file : files) {
-            if (file.isDirectory())
-            {
-            //   DefaultMutableTreeNode fileDirectory =new DefaultMutableTreeNode(file.getName());
-            //   style.add(fileDirectory);
+        try {
+        System.out.println("\n");
+        System.out.println("Working Path: " + workingPath);
+            FTPFile[] files = client.listFiles(workingPath);
+            DefaultMutableTreeNode node = buildNodeFromString(workingPath);
+            DefaultMutableTreeNode lastLeaf = node.getLastLeaf();
+            TreePath path = new TreePath(lastLeaf.getPath());
+        // System.out.println("Path =" + path);
+            DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)(path.getLastPathComponent());       
+        //  System.out.println("Add to Node:" + selectedNode.toString());
+            for (FTPFile file : files) {
+                if (file.isDirectory())
+                {
+                //   DefaultMutableTreeNode fileDirectory =new DefaultMutableTreeNode(file.getName());
+                //   style.add(fileDirectory);
 
-              //  System.out.println("\t Folder Name: " + file.getName());
-              System.out.println("getFileStructure-selectedNodeFORLOOP:" +selectedNode.getChildCount() );
-              DefaultTreeModel model = new DefaultTreeModel(style);
+                //  System.out.println("\t Folder Name: " + file.getName());
+                System.out.println("getFileStructure-selectedNodeFORLOOP:" +selectedNode.getChildCount() );
+                DefaultTreeModel model = new DefaultTreeModel(style);
 
-              DefaultMutableTreeNode parent = findNodeParent(model, workingPath);
-              insertNodes(model,parent , selectedNode);   
-              getFileStructure(client, workingPath + "/" + file.getName(),style);
-            } else {
-            DefaultMutableTreeNode root =new DefaultMutableTreeNode();  
-            System.out.println("getFileStructure-Filename:" + file.getName());
-           
-            DefaultMutableTreeNode fileDirectory =new DefaultMutableTreeNode(file.getName());
-
+                DefaultMutableTreeNode parent = findNodeParent(model, workingPath);
+                insertNodes(model,parent , selectedNode);   
+                getFileStructure(client, workingPath + "/" + file.getName(),style);
+                } else {
+                DefaultMutableTreeNode root =new DefaultMutableTreeNode();  
+                System.out.println("getFileStructure-Filename:" + file.getName());
             
-            selectedNode.add(fileDirectory);
+                DefaultMutableTreeNode fileDirectory =new DefaultMutableTreeNode(file.getName());
 
-          // System.out.println("Added to node = " + selectedNode.toString());
-          //  System.out.println("First Node = " + selectedNode.getFirstChild().toString());
-          //  System.out.println("Last Node = " + selectedNode.getLastChild().toString());
-          //  System.out.println("Num of Children = " + selectedNode.getLeafCount());
-            System.out.println("Depth Count= " + selectedNode.getChildCount());
+                
+                selectedNode.add(fileDirectory);
+
+            // System.out.println("Added to node = " + selectedNode.toString());
+            //  System.out.println("First Node = " + selectedNode.getFirstChild().toString());
+            //  System.out.println("Last Node = " + selectedNode.getLastChild().toString());
+            //  System.out.println("Num of Children = " + selectedNode.getLeafCount());
+                System.out.println("Depth Count= " + selectedNode.getChildCount());
+                }
             }
-        }
-        
-        System.out.println("getFileStructure-selectedNode:" +"Heello you got here!" );
-        System.out.println("getFileStructure-selectedNode:" +selectedNode.getChildCount() );
+            
+            System.out.println("getFileStructure-selectedNode:" +"Heello you got here!" );
+            System.out.println("getFileStructure-selectedNode:" +selectedNode.getChildCount() );
 
-        DefaultTreeModel model = new DefaultTreeModel(style);
-        if (model == null) {System.out.println("MODEL IS NULL");}
-        if (findNodeParent(model, workingPath) == null) {System.out.println("findNodeParent(model, workingPath) IS NULL");}
-        if (selectedNode == null) {System.out.println("selectedNode IS NULL");}
+            DefaultTreeModel model = new DefaultTreeModel(style);
+            if (model == null) {System.out.println("MODEL IS NULL");}
+            if (findNodeParent(model, workingPath) == null) {System.out.println("findNodeParent(model, workingPath) IS NULL");}
+            if (selectedNode == null) {System.out.println("selectedNode IS NULL");}
 
-        DefaultMutableTreeNode parent = findNodeParent(model, workingPath);
-        insertNodes(model,parent , selectedNode); 
-    } catch (IOException ex) {
-        System.out.println("IOException:" + ex);
-     } 
-     return style;
+            DefaultMutableTreeNode parent = findNodeParent(model, workingPath);
+            insertNodes(model,parent , selectedNode); 
+        } catch (IOException ex) {
+            System.out.println("IOException:" + ex);
+        } 
+        return style;
     }
 
 
@@ -618,73 +620,73 @@ public static void logonComponents(JPanel panel,JFrame frame) {
         //    System.out.println("insertNodes-Entered Function");
             
 
-    if (parent == null) {System.out.println("insertNodes-Parent IS NULL");}
-    if (newNode == null) {System.out.println("insertNodes-newNode IS NULL");}
-    System.out.println("insertNodes-childCount:" + parent.toString());
+        if (parent == null) {System.out.println("insertNodes-Parent IS NULL");}
+        if (newNode == null) {System.out.println("insertNodes-newNode IS NULL");}
+        System.out.println("insertNodes-childCount:" + parent.toString());
 
-    // DefaultMutableTreeNode tn = findNodeParent(model,"~/Documents");
-    // if (tn != null) {System.out.println("insertNodes- Documents exists!");}
+        // DefaultMutableTreeNode tn = findNodeParent(model,"~/Documents");
+        // if (tn != null) {System.out.println("insertNodes- Documents exists!");}
 
-    parent.add(newNode);
-    model.nodesWereInserted(parent, new int[]{parent.getChildCount() - 1});
-    }
+        parent.add(newNode);
+        model.nodesWereInserted(parent, new int[]{parent.getChildCount() - 1});
+        }
 
-    protected static DefaultMutableTreeNode findNodeParent(DefaultTreeModel model, String path) {
+        protected static DefaultMutableTreeNode findNodeParent(DefaultTreeModel model, String path) {
 
-    DefaultMutableTreeNode node = (DefaultMutableTreeNode) model.getRoot();
-    // path = "~"+ path;
-    String[] parts = path.split("/");
-    System.out.println("findNodeParent-model:" + node.getUserObject().toString());
-    System.out.println("findNodeParent-path:" + Arrays.toString(parts));
-    System.out.println("findNodeParent-path0:" + parts[0]);
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) model.getRoot();
+        // path = "~"+ path;
+        String[] parts = path.split("/");
+        System.out.println("findNodeParent-model:" + node.getUserObject().toString());
+        System.out.println("findNodeParent-path:" + Arrays.toString(parts));
+        System.out.println("findNodeParent-path0:" + parts[0]);
 
-    if (node.getUserObject().toString().equals(parts[0])) {
-            return findNodeParent(node, Arrays.copyOfRange(parts, 1, parts.length));
-    }
-    return null;
-    }
-
-
-
-    protected static DefaultMutableTreeNode findNodeParent(DefaultMutableTreeNode node, String[] path) {
-    if (path.length == 1) {
-        System.out.println("findNode-ParentNode:" + node.getUserObject().toString()
-                            + " findNode-ParentNodeChildrenCount:" + node.getChildCount());
-        return node;
-    }
-
-    Enumeration<TreeNode> children =  node.children();
-
-    if (path.length > 0) {
-
-    DefaultMutableTreeNode tv = new DefaultMutableTreeNode(path[0]);
-
-    while (children.hasMoreElements()) {
-        //  System.out.println("2");
-        DefaultMutableTreeNode child = (DefaultMutableTreeNode)children.nextElement();
-
-
-        System.out.println("findNode-childName:" + child.getUserObject().toString());
-        System.out.println("findNode-currentFolder:" + path[0]);
-
-
-        if (child == null) {System.out.println("findNode-child IS NULL");}
-        if ( Arrays.copyOfRange(path, 1, path.length) == null) {System.out.println("findNode-newNode IS NULL");}
-
-
-        if (child.getUserObject().toString().equals(path[0])) {
-            return findNodeParent(child, Arrays.copyOfRange(path, 1, path.length));
-            
+        if (node.getUserObject().toString().equals(parts[0])) {
+                return findNodeParent(node, Arrays.copyOfRange(parts, 1, parts.length));
+        }
+        return null;
         }
 
 
-    }
 
-    }
-    else {
-    return node;
-    }
-    return null;
+        protected static DefaultMutableTreeNode findNodeParent(DefaultMutableTreeNode node, String[] path) {
+        if (path.length == 1) {
+            System.out.println("findNode-ParentNode:" + node.getUserObject().toString()
+                                + " findNode-ParentNodeChildrenCount:" + node.getChildCount());
+            return node;
+        }
+
+        Enumeration<TreeNode> children =  node.children();
+
+        if (path.length > 0) {
+
+        DefaultMutableTreeNode tv = new DefaultMutableTreeNode(path[0]);
+
+        while (children.hasMoreElements()) {
+            //  System.out.println("2");
+            DefaultMutableTreeNode child = (DefaultMutableTreeNode)children.nextElement();
+
+
+            System.out.println("findNode-childName:" + child.getUserObject().toString());
+            System.out.println("findNode-currentFolder:" + path[0]);
+
+
+            if (child == null) {System.out.println("findNode-child IS NULL");}
+            if ( Arrays.copyOfRange(path, 1, path.length) == null) {System.out.println("findNode-newNode IS NULL");}
+
+
+            if (child.getUserObject().toString().equals(path[0])) {
+                return findNodeParent(child, Arrays.copyOfRange(path, 1, path.length));
+                
+            }
+
+
+        }
+
+        }
+        else {
+        return node;
+        }
+        return null;
     }
 
     private static DefaultMutableTreeNode buildNodeFromString(String path)
