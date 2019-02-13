@@ -26,6 +26,8 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import javax.imageio.ImageIO;
+
 
 
 
@@ -55,7 +57,11 @@ public class client {
         JFrame frame = new JFrame("FTP Client");
         frame.setSize(300,200);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-         
+        try {
+            frame.setIconImage(ImageIO.read(new File("ftp.png")));
+        } catch(IOException ae) {
+            System.out.print("IOException");
+        } 
         JPanel panel = new JPanel();
         frame.add(panel);
         logonComponents(panel,frame);
